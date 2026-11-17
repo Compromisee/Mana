@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Channels;
@@ -23,6 +24,10 @@ internal class DownloadService : IDownloadService
 
     private readonly Channel<DownloadItem> _downloadQueue = Channel.CreateUnbounded<DownloadItem>();
     private readonly List<DownloadItem> _downloads = new();
+    private double _averageSecondsPerPage = 1.5;
+    private int _observedPages;
+    private double _averageSecondsPerChapter = 25;
+    private int _completedChapters;
 
     public event Action<IReadOnlyList<DownloadItem>>? DownloadsChanged;
 
@@ -179,7 +184,10 @@ internal class DownloadService : IDownloadService
             await foreach (var item in _downloadQueue.Reader.ReadAllAsync())
             {
                 if (item.Status == DownloadStatus.Cancelled)
+                {
+                    NotifyDownloadsChanged();
                     continue;
+                }
 
                 await ProcessDownloadAsync(item);
             }
@@ -193,7 +201,11 @@ internal class DownloadService : IDownloadService
     private async Task ProcessDownloadAsync(DownloadItem item)
     {
         item.Status = DownloadStatus.Downloading;
+        item.QueuePosition = 0;
+        item.EstimatedTimeRemaining = null;
+        NotifyDownloadsChanged();
 
+        var downloadTimer = Stopwatch.StartNew();
         var destFolder = AppDataHelper.GetComicChapterDataPath(item.ComicKey, item.ChapterKey.Id);
         try
         {
@@ -209,38 +221,57 @@ internal class DownloadService : IDownloadService
                     item.ChapterKey,
                     pagesResult.Error
                 );
+                NotifyDownloadsChanged();
                 return;
             }
 
             var pages = pagesResult.Value!;
-            foreach (var page in pages)
+            item.TotalPages = pages.Count;
+            item.CompletedPages = 0;
+            item.Progress = pages.Count == 0 ? 1 : 0;
+            for (var index = 0; index < pages.Count; index++)
             {
                 item.Cts.Token.ThrowIfCancellationRequested();
-
+                var page = pages[index];
                 var ext = GetImageExtension(page.ImageUrl);
                 var destFile = Path.Combine(destFolder, $"{page.Number}{ext}");
-
+                var pageTimer = Stopwatch.StartNew();
                 await DownloadImageAsync(page.ImageUrl, destFile, item.Cts.Token);
+                pageTimer.Stop();
                 page.ImageUrl = destFile;
 
-                item.Progress = (double)page.Number / pages.Count;
+                item.CompletedPages = index + 1;
+                item.Progress = (double)item.CompletedPages / Math.Max(1, pages.Count);
+                _averageSecondsPerPage = ((_averageSecondsPerPage * _observedPages) + Math.Max(0.05, pageTimer.Elapsed.TotalSeconds)) / ++_observedPages;
+                item.EstimatedTimeRemaining = TimeSpan.FromSeconds(
+                    _averageSecondsPerPage * (pages.Count - item.CompletedPages)
+                );
             }
 
             await _dataService.UpsertChapterPagesAsync(item.ComicKey, item.ChapterKey, pages);
+            downloadTimer.Stop();
+            _averageSecondsPerChapter = ((_averageSecondsPerChapter * _completedChapters) + Math.Max(1, downloadTimer.Elapsed.TotalSeconds)) / ++_completedChapters;
+            item.Progress = 1;
             item.Status = DownloadStatus.Completed;
+            item.EstimatedTimeRemaining = TimeSpan.Zero;
             _logger.LogInformation("Download completed for chapter {ChapterKey}", item.ChapterKey);
+            NotifyDownloadsChanged();
         }
         catch (OperationCanceledException)
         {
             item.Status = DownloadStatus.Cancelled;
+            item.EstimatedTimeRemaining = null;
             await Task.Run(() => DeleteChapterFolder(item.ComicKey, item.ChapterKey));
             _logger.LogInformation("Download cancelled for chapter {ChapterKey}", item.ChapterKey);
+            NotifyDownloadsChanged();
         }
         catch (Exception ex)
         {
             item.Status = DownloadStatus.Failed;
+            item.EstimatedTimeRemaining = null;
             await Task.Run(() => DeleteChapterFolder(item.ComicKey, item.ChapterKey));
             _logger.LogError(ex, "Download failed for chapter {ChapterKey}", item.ChapterKey);
+            NotifyDownloadsChanged();
         }
     }
 
@@ -297,5 +328,14 @@ internal class DownloadService : IDownloadService
         return ext;
     }
 
-    private void NotifyDownloadsChanged() => DownloadsChanged?.Invoke(_downloads.ToList());
+    private void NotifyDownloadsChanged()
+    {
+        var queuePosition = 0;
+        foreach (var item in _downloads.Where(download => download.Status == DownloadStatus.Queued))
+        {
+            item.QueuePosition = ++queuePosition;
+            item.EstimatedTimeRemaining = TimeSpan.FromSeconds(_averageSecondsPerChapter * queuePosition);
+        }
+        DownloadsChanged?.Invoke(_downloads.ToList());
+    }
 }

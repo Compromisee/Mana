@@ -1,4 +1,4 @@
-﻿namespace Yukari.Services.UI;
+namespace Yukari.Services.UI;
 
 public interface ILocalizationService
 {

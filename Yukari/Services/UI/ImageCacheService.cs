@@ -2,7 +2,9 @@ using System;
 using System.Collections.Concurrent;
 using System.IO;
 using System.IO.Compression;
+using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
 using Yukari.Helpers;
@@ -15,14 +17,18 @@ internal class ImageCacheService : IImageCacheService
     private const int MaxCacheEntries = 64;
 
     private readonly IDownloadService _downloadService;
+    private readonly ILogger<ImageCacheService> _logger;
+    private static readonly HttpClient RemoteImageClient = new() { Timeout = TimeSpan.FromSeconds(15) };
+    private const int MaxRemoteImageBytes = 8 * 1024 * 1024;
 
     private readonly ConcurrentDictionary<string, ImageSource> _cache = new();
     private readonly ConcurrentDictionary<string, Task> _loadTasks = new();
     private readonly ConcurrentQueue<string> _insertionQueue = new();
 
-    public ImageCacheService(IDownloadService downloadService)
+    public ImageCacheService(IDownloadService downloadService, ILogger<ImageCacheService> logger)
     {
         _downloadService = downloadService;
+        _logger = logger;
     }
 
     public ImageSource GetImageSource(string? url)
@@ -88,10 +94,48 @@ internal class ImageCacheService : IImageCacheService
         return filePath;
     }
 
-    public async Task<byte[]?> GetImageBytesAsync(string url) =>
-        IsZipEntry(url) ? await ReadZipEntryBytesAsync(url)
-        : IsLocalPath(url) ? await ReadLocalFileBytesAsync(url)
-        : await _downloadService.GetImageBytesAsync(url);
+    public async Task<byte[]?> GetImageBytesAsync(string url)
+    {
+        if (IsZipEntry(url))
+            return await ReadZipEntryBytesAsync(url);
+        if (IsLocalPath(url))
+            return await ReadLocalFileBytesAsync(url);
+        if (Uri.TryCreate(url, UriKind.Absolute, out var uri)
+            && uri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
+            return await ReadRemoteImageBytesAsync(uri);
+        return await _downloadService.GetImageBytesAsync(url);
+    }
+
+    private static async Task<byte[]?> ReadRemoteImageBytesAsync(Uri uri)
+    {
+        try
+        {
+            using var response = await RemoteImageClient.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead);
+            if (!response.IsSuccessStatusCode
+                || (response.Content.Headers.ContentLength is long length && length > MaxRemoteImageBytes))
+                return null;
+
+            var mediaType = response.Content.Headers.ContentType?.MediaType;
+            if (mediaType is not null && !mediaType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+                return null;
+
+            await using var input = await response.Content.ReadAsStreamAsync();
+            using var output = new MemoryStream();
+            var buffer = new byte[16 * 1024];
+            int read;
+            while ((read = await input.ReadAsync(buffer)) > 0)
+            {
+                if (output.Length + read > MaxRemoteImageBytes)
+                    return null;
+                output.Write(buffer, 0, read);
+            }
+            return output.Length == 0 ? null : output.ToArray();
+        }
+        catch
+        {
+            return null;
+        }
+    }
 
     private void AddToCache(string key, ImageSource imageSource)
     {
@@ -109,8 +153,18 @@ internal class ImageCacheService : IImageCacheService
 
     private async Task LoadAsync(string url, ImageSource imageSource)
     {
-        byte[]? bytes = await GetImageBytesAsync(url);
-        await ApplyBytesToImageSourceAsync(url, imageSource, bytes);
+        try
+        {
+            byte[]? bytes = await GetImageBytesAsync(url);
+            await ApplyBytesToImageSourceAsync(url, imageSource, bytes);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to decode or load image {ImageUrl}", url);
+            _cache.TryRemove(url, out _);
+            _loadTasks.TryRemove(url, out _);
+            MarkImageSourceAsFailed(imageSource);
+        }
     }
 
     private static async Task<byte[]?> ReadLocalFileBytesAsync(string path)
@@ -156,11 +210,7 @@ internal class ImageCacheService : IImageCacheService
         if (bytes == null)
         {
             // The purpose of assigning a value that refers to a file that does not exist is to trigger the ImageSource error event.
-            var errorUri = new Uri("ms-appx:///Assets/___nonexistent___");
-            if (imageSource is BitmapImage bitmap)
-                bitmap.UriSource = errorUri;
-            else if (imageSource is SvgImageSource svg)
-                svg.UriSource = errorUri;
+            MarkImageSourceAsFailed(imageSource);
 
             _cache.TryRemove(url, out _);
             _loadTasks.TryRemove(url, out _);
@@ -185,9 +235,22 @@ internal class ImageCacheService : IImageCacheService
         }
     }
 
-    private static bool IsSvg(string url) =>
-        url.EndsWith(".svg", StringComparison.OrdinalIgnoreCase)
-        || url.EndsWith(".svgz", StringComparison.OrdinalIgnoreCase);
+    private static void MarkImageSourceAsFailed(ImageSource imageSource)
+    {
+        // Force ImageFailed so the reader's retry/error UI is used consistently.
+        var errorUri = new Uri("ms-appx:///Assets/___nonexistent___");
+        if (imageSource is BitmapImage bitmap)
+            bitmap.UriSource = errorUri;
+        else if (imageSource is SvgImageSource svg)
+            svg.UriSource = errorUri;
+    }
+
+    private static bool IsSvg(string url)
+    {
+        var path = Uri.TryCreate(url, UriKind.Absolute, out var uri) ? uri.AbsolutePath : url;
+        return path.EndsWith(".svg", StringComparison.OrdinalIgnoreCase)
+            || path.EndsWith(".svgz", StringComparison.OrdinalIgnoreCase);
+    }
 
     private static bool IsZipEntry(string url) => url.StartsWith(ImageUriHelper.ZipScheme);
 

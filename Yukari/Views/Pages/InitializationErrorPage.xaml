@@ -24,7 +24,7 @@
                        Margin="12,0,0,0"
                        VerticalAlignment="Center"
                        Style="{StaticResource CaptionTextBlockStyle}"
-                       Text="Yukari" />
+                       Text="Mana" />
         </Grid>
         <Grid Grid.Row="1"
               Margin="16"
@@ -62,8 +62,8 @@
         </Grid>
         <Grid Grid.Row="2" Margin="4,0,4,4" ColumnDefinitions="Auto, *, Auto">
             <StackPanel HorizontalAlignment="Center" Orientation="Horizontal" Spacing="8">
-                <HyperlinkButton x:Uid="FeedbackHLBT" NavigateUri="https://github.com/Yukari-App/Yukari/issues" />
-                <HyperlinkButton x:Uid="ProjectRepoHLBT" NavigateUri="https://github.com/Yukari-App/Yukari" />
+                <HyperlinkButton x:Uid="FeedbackHLBT" NavigateUri="https://github.com/compromisee/Mana/issues" />
+                <HyperlinkButton x:Uid="ProjectRepoHLBT" NavigateUri="https://github.com/compromisee/Mana" />
             </StackPanel>
             <TextBlock Grid.Column="2"
                        Margin="0,0,8,0"

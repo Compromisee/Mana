@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -85,12 +86,17 @@ public partial class CollectionsManagerDialogViewModel : ObservableObject
             return;
         }
 
+        var colorsResult = await _comicService.GetCollectionColorsAsync(_cts.Token);
+        var colors = colorsResult.IsSuccess
+            ? colorsResult.Value!
+            : new System.Collections.Generic.Dictionary<string, string>();
         Collections = result
             .Value!.Select(collection => new CollectionItemViewModel(
                 _comicService,
                 _notificationService,
                 MaxCollectionNameLength,
                 collection,
+                colors.GetValueOrDefault(collection, "#6C75C8"),
                 DeleteCollectionCommand
             ))
             .ToArray();

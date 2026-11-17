@@ -12,6 +12,7 @@ public interface ISourceManager
         CancellationToken ct = default
     );
     Task<Result> UpsertComicSourceAsync(string pluginPath);
+    Task<Result> UpsertAidokuSourceAsync(ComicSourceModel source);
     Task<Result> UpdateComicSourceIsEnabledAsync(string sourceName, bool isEnabled);
     Task<Result> RemoveComicSourceAsync(string sourceName);
 }

@@ -39,7 +39,7 @@ jobs:
       - name: Create Minimal Zip
         shell: pwsh
         run: |
-          Compress-Archive -Path publish/minimal/* -DestinationPath Yukari.Minimal.${{ matrix.arch }}.zip
+          Compress-Archive -Path publish/minimal/* -DestinationPath Mana.Minimal.${{ matrix.arch }}.zip
 
       - name: Compile Inno Setup
         shell: pwsh
@@ -49,11 +49,11 @@ jobs:
       - name: Upload Minimal Zip
         uses: actions/upload-artifact@v4
         with:
-          name: Yukari.Minimal.${{ matrix.arch }}
-          path: Yukari.Minimal.${{ matrix.arch }}.zip
+          name: Mana.Minimal.${{ matrix.arch }}
+          path: Mana.Minimal.${{ matrix.arch }}.zip
 
       - name: Upload Setup Exe
         uses: actions/upload-artifact@v4
         with:
-          name: Yukari.Setup.${{ matrix.arch }}
-          path: Packaging/Yukari.Setup.${{ matrix.arch }}*.exe
+          name: Mana.Setup.${{ matrix.arch }}
+          path: Packaging/Mana.Setup.${{ matrix.arch }}*.exe

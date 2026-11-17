@@ -1,5 +1,5 @@
--- Current schema: Version 6
--- Last updated: Migration_006
+-- Current schema: Version 10
+-- Last updated: Migration_010
 -- To understand how we got here, read Migrations/ in order.
 
 -- Comics definition
@@ -45,6 +45,22 @@ CREATE TABLE ComicReadingProgress (
 CREATE INDEX IX_ComicReadingProgress_ComicId_Source
     ON ComicReadingProgress (ComicId, Source);
 
+-- Daily activity is a per-comic-per-day record, avoiding inflated counts from reader autosaves.
+CREATE TABLE ReadingActivity (
+    ActivityDate TEXT NOT NULL,
+    ComicId TEXT NOT NULL,
+    Source TEXT NOT NULL,
+    PRIMARY KEY (ActivityDate, ComicId, Source)
+);
+
+CREATE INDEX IX_ReadingActivity_ActivityDate ON ReadingActivity (ActivityDate);
+
+-- Foreground reader time is stored separately so it also covers standalone/local chapters.
+CREATE TABLE DailyReadingActivity (
+    ActivityDate TEXT NOT NULL PRIMARY KEY,
+    SecondsRead INTEGER NOT NULL DEFAULT 0
+);
+
 -- Chapters definition
 
 CREATE TABLE Chapters (
@@ -52,6 +68,7 @@ CREATE TABLE Chapters (
     ComicId TEXT NOT NULL,
     Source TEXT NOT NULL,
     Title TEXT,
+    Url TEXT,
     Number TEXT,
     Volume TEXT,
     Language TEXT NOT NULL,
@@ -102,8 +119,24 @@ CREATE INDEX IX_ChapterPages_Chapter
 
 CREATE TABLE Collections (
     Id INTEGER PRIMARY KEY,
-    Name TEXT NOT NULL UNIQUE
+    Name TEXT NOT NULL UNIQUE,
+    Color TEXT NOT NULL DEFAULT '#6C75C8'
 );
+
+CREATE TABLE LocalLibraryGroups (
+    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+    Name TEXT NOT NULL UNIQUE,
+    Color TEXT NOT NULL DEFAULT '#6C75C8'
+);
+
+CREATE TABLE LocalLibraryGroupItems (
+    FolderPath TEXT NOT NULL PRIMARY KEY,
+    GroupId INTEGER NOT NULL,
+    FOREIGN KEY (GroupId) REFERENCES LocalLibraryGroups(Id) ON DELETE CASCADE
+);
+
+CREATE INDEX IX_LocalLibraryGroupItems_GroupId
+    ON LocalLibraryGroupItems(GroupId);
 
 -- ComicCollections definition
 

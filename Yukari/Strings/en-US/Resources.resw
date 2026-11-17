@@ -434,10 +434,10 @@
     <value>Comic Sources</value>
   </data>
   <data name="ComicSourcesHelpExpander.Description" xml:space="preserve">
-    <value>Understanding Yukari plugins</value>
+    <value>Understanding Mana plugins</value>
   </data>
   <data name="ComicSourcesHelp1" xml:space="preserve">
-    <value>**Yukari** doesn't come with pre-installed **Comic Sources** for legal reasons. You add the sources you want through **community plugins**.</value>
+    <value>**Mana** doesn't come with pre-installed **Comic Sources** for legal reasons. You add the sources you want through **community plugins**.</value>
   </data>
   <data name="ComicSourcesHelp2" xml:space="preserve">
     <value>Installing a **Comic Source** is simple: download the **.dll** plugin, go to: **Settings → Comic Sources → Add New Source** and select the downloaded plugin.</value>
@@ -446,7 +446,7 @@
     <value>You can find the plugins [HERE](https://github.com/orgs/Yukari-App/repositories?q=Plugin%20sort%3Aname-asc). Select a **repository** with "Plugin" in the name, go to the **releases** section, and download a compatible version.</value>
   </data>
   <data name="ComicSourcesHelp4" xml:space="preserve">
-    <value>**Make sure you are using the latest version of Yukari** to guarantee compatibility with the newest plugins. Check the [releases page](https://github.com/Yukari-App/Yukari/releases).</value>
+    <value>**Make sure you are using the latest version of Mana** to guarantee compatibility with the newest plugins. Check the [releases page](https://github.com/compromisee/Mana/releases).</value>
   </data>
   <data name="ComicsSection.Text" xml:space="preserve">
     <value>Comics</value>
@@ -473,7 +473,7 @@
     <value>Reading your personal comic collection</value>
   </data>
   <data name="LocalComicsHelp1" xml:space="preserve">
-    <value>Yukari supports three local formats: **folders containing images** (one folder per chapter), **.cbz**, and **.epub** archives. Pages are read directly without extraction.</value>
+    <value>Mana supports three local formats: **folders containing images** (one folder per chapter), **.cbz**, and **.epub** archives. Pages are read directly without extraction.</value>
   </data>
   <data name="LocalComicsHelp2" xml:space="preserve">
     <value>To add a local comic: open **Favorites** → ⋯ menu → **Add Local Comic**. Fill in the details and point to the folder containing your chapters.</value>
@@ -509,7 +509,7 @@
     <value>Download chapters from the Comic page to read them **offline**. Downloads run in the background and progress is shown per chapter.</value>
   </data>
   <data name="DownloadsHelp2" xml:space="preserve">
-    <value>Downloaded chapters are stored in **Yukari's app data folder**. You can delete individual chapters or all at once from the Comic page.</value>
+    <value>Downloaded chapters are stored in **Mana's app data folder**. You can delete individual chapters or all at once from the Comic page.</value>
   </data>
   <data name="DownloadsHelp3" xml:space="preserve">
     <value>Removing a comic from favorites **automatically deletes all its downloaded data**.</value>
@@ -524,10 +524,10 @@
     <value>Getting help and reporting problems</value>
   </data>
   <data name="SupportHelp1" xml:space="preserve">
-    <value>If something isn't working, check the [known issues](https://github.com/Yukari-App/Yukari/issues) or report a new one. Your feedback is what makes Yukari better!</value>
+    <value>If something isn't working, check the [known issues](https://github.com/compromisee/Mana/issues) or report a new one. Your feedback is what makes Mana better!</value>
   </data>
   <data name="InitializationErrorTXB.Text" xml:space="preserve">
-    <value>An Error Occurred During Yukari Initialization</value>
+    <value>An Error Occurred During Mana Initialization</value>
   </data>
   <data name="InitializationErrorSuggestionTXB.Text" xml:space="preserve">
     <value>Try reopening the app again. If the problem persists, please send feedback using the buttons below.</value>
@@ -829,10 +829,10 @@
     <value>Comic source added/updated successfully.</value>
   </data>
   <data name="WarningUpdatingSourceInUseRestartRequest" xml:space="preserve">
-    <value>The source is already in use and cannot be updated now. Restart Yukari to complete the update.</value>
+    <value>The source is already in use and cannot be updated now. Restart Mana to complete the update.</value>
   </data>
   <data name="WarningRemovingSourceInUseRestartRequest" xml:space="preserve">
-    <value>The source is currently in use and cannot be removed. Restart Yukari to complete the removal.</value>
+    <value>The source is currently in use and cannot be removed. Restart Mana to complete the removal.</value>
   </data>
   <data name="SuccessStorageCleanedUp" xml:space="preserve">
     <value>Storage cleaned up successfully.</value>
@@ -952,7 +952,7 @@
     <value>The source '{0}' is currently disabled. Please enable it in the settings.</value>
   </data>
   <data name="ErrorPluginVersionMismatch" xml:space="preserve">
-    <value>The plugin '{0}' is incompatible with this version of Yukari. Please download a compatible version of the plugin or update Yukari.</value>
+    <value>The plugin '{0}' is incompatible with this version of Mana. Please download a compatible version of the plugin or update Mana.</value>
   </data>
   <data name="ErrorCollectionAlreadyExists" xml:space="preserve">
     <value>A collection named '{0}' already exists.</value>

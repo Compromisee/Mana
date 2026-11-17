@@ -17,6 +17,9 @@ internal sealed class NavigationService : INavigationService
             {
                 Type t when t == typeof(FavoritesPage) => AppPage.FavoritesPage,
                 Type t when t == typeof(DiscoverPage) => AppPage.DiscoverPage,
+                Type t when t == typeof(LocalLibraryPage) => AppPage.LocalLibraryPage,
+                Type t when t == typeof(ReadingStatsPage) => AppPage.ReadingStatsPage,
+                Type t when t == typeof(SourcesPage) => AppPage.SourcesPage,
                 Type t when t == typeof(ComicPage) => AppPage.ComicPage,
                 _ => AppPage.Other,
             };

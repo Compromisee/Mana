@@ -14,8 +14,10 @@ using Yukari.Messages;
 using Yukari.Messages.Shortcuts;
 using Yukari.Models;
 using Yukari.Models.DTO;
+using Yukari.Models.Settings;
 using Yukari.Services.Comics;
 using Yukari.Services.Settings;
+using Yukari.Services.Storage;
 using Yukari.Services.UI;
 using Yukari.ViewModels.Components;
 
@@ -26,6 +28,7 @@ public partial class ReaderPageViewModel : ObservableObject, IRecipient<Fullscre
     public const int PageProgressDebounceMs = 600;
 
     private readonly IComicService _comicService;
+    private readonly IDataService _dataService;
     private readonly ISettingsService _settingsService;
     private readonly INotificationService _notificationService;
     private readonly IDialogService _dialogService;
@@ -45,6 +48,7 @@ public partial class ReaderPageViewModel : ObservableObject, IRecipient<Fullscre
     private CancellationTokenSource _navigationCts = new();
     private CancellationTokenSource _chapterLoadCts = new();
     private CancellationTokenSource? _pageProgressDebounceCts;
+    private CancellationTokenSource? _readerImageSettingsCts;
     private readonly SemaphoreSlim _saveProgressLock = new(1, 1);
 
     public bool IsSyncingPageIndex { get; set; }
@@ -140,6 +144,12 @@ public partial class ReaderPageViewModel : ObservableObject, IRecipient<Fullscre
     public partial ScalingMode ScalingMode { get; set; } = ScalingMode.FitScreen;
 
     [ObservableProperty]
+    public partial double ReaderBrightness { get; set; }
+
+    [ObservableProperty]
+    public partial double ReaderContrast { get; set; }
+
+    [ObservableProperty]
     [NotifyPropertyChangedFor(
         nameof(IsLoading),
         nameof(IsLoaded),
@@ -172,6 +182,7 @@ public partial class ReaderPageViewModel : ObservableObject, IRecipient<Fullscre
 
     public ReaderPageViewModel(
         IComicService comicService,
+        IDataService dataService,
         ISettingsService settingsService,
         INotificationService notificationService,
         IDialogService dialogService,
@@ -181,6 +192,7 @@ public partial class ReaderPageViewModel : ObservableObject, IRecipient<Fullscre
     )
     {
         _comicService = comicService;
+        _dataService = dataService;
         _settingsService = settingsService;
         _notificationService = notificationService;
         _dialogService = dialogService;
@@ -191,6 +203,8 @@ public partial class ReaderPageViewModel : ObservableObject, IRecipient<Fullscre
         _messenger.RegisterAll(this);
         LoadReaderSettings();
     }
+
+    public Task RecordReadingSecondsAsync(int seconds) => _dataService.AddReadingSecondsAsync(seconds);
 
     public void Receive(FullscreenShortcutMessage message)
     {
@@ -328,6 +342,10 @@ public partial class ReaderPageViewModel : ObservableObject, IRecipient<Fullscre
         _pageProgressDebounceCts?.Cancel();
         _pageProgressDebounceCts?.Dispose();
         _pageProgressDebounceCts = null;
+        _readerImageSettingsCts?.Cancel();
+        _readerImageSettingsCts?.Dispose();
+        _readerImageSettingsCts = null;
+        _ = _settingsService.SaveAsync();
 
         _ = SaveChapterProgressAsync();
 
@@ -365,7 +383,8 @@ public partial class ReaderPageViewModel : ObservableObject, IRecipient<Fullscre
         var pagesResult = await _comicService.GetChapterPagesAsync(
             _comicKey,
             CurrentChapter.Key,
-            ct: linkedCts.Token
+            ct: linkedCts.Token,
+            chapterUrl: CurrentChapter.Url
         );
 
         if (pagesResult.IsCancelled)
@@ -535,6 +554,8 @@ public partial class ReaderPageViewModel : ObservableObject, IRecipient<Fullscre
 
         ReadingMode = _settingsService.Current.ReadingMode;
         ScalingMode = _settingsService.Current.ScalingMode;
+        ReaderBrightness = _settingsService.Current.ReaderBrightness;
+        ReaderContrast = _settingsService.Current.ReaderContrast;
     }
 
     private async Task SaveComicProgressAsync()
@@ -641,4 +662,29 @@ public partial class ReaderPageViewModel : ObservableObject, IRecipient<Fullscre
     }
 
     partial void OnScalingModeChanged(ScalingMode value) => _displayContext.ScalingMode = value;
+
+    partial void OnReaderBrightnessChanged(double value) =>
+        UpdateReaderImageSetting(s => s.ReaderBrightness, value);
+
+    partial void OnReaderContrastChanged(double value) =>
+        UpdateReaderImageSetting(s => s.ReaderContrast, value);
+
+    private void UpdateReaderImageSetting(System.Linq.Expressions.Expression<Func<AppSettings, double>> setting, double value)
+    {
+        _settingsService.Set(setting, value);
+        _readerImageSettingsCts?.Cancel();
+        _readerImageSettingsCts?.Dispose();
+        _readerImageSettingsCts = new CancellationTokenSource();
+        _ = SaveReaderImageSettingsAfterDelayAsync(_readerImageSettingsCts.Token);
+    }
+
+    private async Task SaveReaderImageSettingsAfterDelayAsync(CancellationToken token)
+    {
+        try
+        {
+            await Task.Delay(400, token);
+            await _settingsService.SaveAsync();
+        }
+        catch (TaskCanceledException) { }
+    }
 }

@@ -28,8 +28,9 @@ namespace Yukari;
 
 public partial class App : Application
 {
-    private const string AppInstanceKey = "Yukari.MainApp";
+    private const string AppInstanceKey = "Mana.MainApp";
     private static MainWindow? _mainWindow;
+    internal static MainWindow? CurrentWindow => _mainWindow;
     private static string? _pendingFileToOpen;
     private static bool _isShellReady;
 
@@ -53,9 +54,9 @@ public partial class App : Application
             .CreateLogger();
 
 #if DEBUG || DEBUG_UNPACKAGED
-        Log.Debug("Yukari Debug starting — version {Version}", AppInfoHelper.Version);
+        Log.Debug("Mana Debug starting — version {Version}", AppInfoHelper.Version);
 #else
-        Log.Information("Yukari starting — version {Version}", AppInfoHelper.Version);
+        Log.Information("Mana starting — version {Version}", AppInfoHelper.Version);
 #endif
 
         _services = ConfigureServices();
@@ -102,7 +103,7 @@ public partial class App : Application
         }
         catch (Exception ex)
         {
-            Log.Fatal(ex, "Failed to initialize Yukari — navigating to InitializationErrorPage");
+            Log.Fatal(ex, "Failed to initialize Mana — navigating to InitializationErrorPage");
             _mainWindow.NavigateToError(ex);
         }
         finally
@@ -148,6 +149,8 @@ public partial class App : Application
         services.AddSingleton<IExportService, ExportService>();
         services.AddSingleton<ISourceService, SourceService>();
         services.AddSingleton<ISourceManager, SourceManager>();
+        services.AddSingleton<AidokuRepositoryService>();
+        services.AddSingleton<AidokuRuntimeService>();
         services.AddSingleton<ILocalSourceService, LocalSourceService>();
         services.AddSingleton<IBrowserService, BrowserService>();
         services.AddSingleton<IComicService, ComicService>();
@@ -155,7 +158,7 @@ public partial class App : Application
         services.AddSingleton(sp =>
         {
             var httpClient = new HttpClient();
-            httpClient.DefaultRequestHeaders.UserAgent.ParseAdd($"Yukari/{AppInfoHelper.Version}");
+            httpClient.DefaultRequestHeaders.UserAgent.ParseAdd($"Mana/{AppInfoHelper.Version}");
             return httpClient;
         });
 

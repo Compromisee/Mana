@@ -49,6 +49,9 @@ public partial class ChapterItemViewModel : ObservableObject
     public ContentKey Key => Chapter.Key;
 
     public string? DisplayTitle { get; }
+    public bool IsCompactListMode { get; }
+    public double RowHeight => IsCompactListMode ? 58 : 94;
+    public double TitleFontSize => IsCompactListMode ? 15 : 18;
 
     public IEnumerable<string> DisplayGroups => Chapter.Groups.Take(MaxGroupsToShow);
 
@@ -122,6 +125,7 @@ public partial class ChapterItemViewModel : ObservableObject
         ContentKey comicKey,
         bool isComicFavorite,
         string comicTitle,
+        bool compactListMode,
         IRelayCommand<ContentKey> navigateToReaderCommand,
         IRelayCommand<ChapterItemViewModel> markPreviousChaptersAsReadCommand,
         IRelayCommand<ChapterItemViewModel> exportChapterCommand
@@ -135,6 +139,7 @@ public partial class ChapterItemViewModel : ObservableObject
         Chapter = chapterAggregate.Chapter;
         _isComicFavorite = isComicFavorite;
         _comicTitle = comicTitle;
+        IsCompactListMode = compactListMode;
 
         DisplayTitle = Chapter.ToDisplayTitle();
         TotalPages = Chapter.Pages;
@@ -198,7 +203,7 @@ public partial class ChapterItemViewModel : ObservableObject
                 Key,
                 _comicTitle,
                 DisplayTitle!,
-                ct => _comicService.GetChapterPagesAsync(_comicKey, Key, forceWeb: true, ct)
+                ct => _comicService.GetChapterPagesAsync(_comicKey, Key, forceWeb: true, ct: ct, chapterUrl: Chapter.Url)
             );
             DownloadItem.PropertyChanged += OnDownloadItemPropertyChanged;
         }

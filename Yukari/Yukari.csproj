@@ -5,6 +5,7 @@
     <TargetPlatformMinVersion>10.0.19041.0</TargetPlatformMinVersion>
     <LangVersion>preview</LangVersion>
     <RootNamespace>Yukari</RootNamespace>
+    <AssemblyName>Mana</AssemblyName>
     <ApplicationIcon>Assets\AppIcon.ico</ApplicationIcon>
     <DefaultLanguage>en-US</DefaultLanguage>
     <ApplicationManifest>app.manifest</ApplicationManifest>
@@ -20,17 +21,17 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <VersionPrefix>1.6.0</VersionPrefix>
+    <VersionPrefix>1.7.0</VersionPrefix>
     <VersionSuffix></VersionSuffix>
     <Version>$(VersionPrefix)$([System.String]::Copy('-$(VersionSuffix)').TrimEnd('-'))</Version>
     <AssemblyVersion>$(VersionPrefix)</AssemblyVersion>
     <AssemblyFileVersion>$(VersionPrefix)</AssemblyFileVersion>
     <AssemblyInformationalVersion>$(Version)</AssemblyInformationalVersion>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
-    <AssemblyTitle>Yukari</AssemblyTitle>
-    <AssemblyProduct>Yukari</AssemblyProduct>
-    <Copyright>Copyright © TXG0Fk3. Licensed under GPL-3.0.</Copyright>
-    <AssemblyCopyright>Copyright © TXG0Fk3. Licensed under GPL-3.0.</AssemblyCopyright>
+    <AssemblyTitle>Mana</AssemblyTitle>
+    <AssemblyProduct>Mana</AssemblyProduct>
+    <Copyright>Copyright © Yukari-App contributors; Mana fork by compromisee. GPL-3.0.</Copyright>
+    <AssemblyCopyright>Copyright © Yukari-App contributors; Mana fork by compromisee. GPL-3.0.</AssemblyCopyright>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
@@ -101,6 +102,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.13" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2705" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.5.1" />
+    <PackageReference Include="Microsoft.Graphics.Win2D" Version="1.4.0" />
     <PackageReference Include="Serilog" Version="4.4.0" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="10.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />

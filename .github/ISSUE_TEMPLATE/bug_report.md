@@ -26,11 +26,11 @@ If applicable, add screenshots to help explain your problem.
 
 **Environment**
 - Windows Version [e.g. 10.0.22631]
-- Yukari Version [e.g. 0.8.1-Beta]
+- Mana Version [e.g. 0.8.1-Beta]
 - Source/Plugin Version (if applicable, e.g. MangaDex Plugin 2.2.1+core2.2.0)
 
 **Logs**
-If possible, attach or paste relevant logs from the Yukari log file (located in `%APPDATA%/Yukari/Logs`).
+If possible, attach or paste relevant logs from the Mana log file (located in `%APPDATA%/Yukari/Logs`).
 
 **Additional context**
 Add any other context about the problem here.

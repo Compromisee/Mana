@@ -1,7 +1,7 @@
-#define MyAppName "Yukari"
-#define MyAppPublisher "TXG0Fk3"
-#define MyAppURL "https://github.com/Yukari-App/Yukari"
-#define MyAppExeName "Yukari.exe"
+#define MyAppName "Mana"
+#define MyAppPublisher "compromisee"
+#define MyAppURL "https://github.com/compromisee/Mana"
+#define MyAppExeName "Mana.exe"
 
 #ifndef MyArch
   #define MyArch "x64"
@@ -71,23 +71,23 @@ Name: "associateepub"; Description: "Associate .epub files with {#MyAppName}"; G
 Source: "{#AppPublishPath}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Registry]
-; Register Yukari.exe metadata for "Open with" menu
+; Register Mana.exe metadata for "Open with" menu
 Root: HKA; Subkey: "Software\Classes\Applications\{#MyAppExeName}"; ValueType: string; ValueName: "FriendlyAppName"; ValueData: "{#MyAppName}"; Flags: uninsdeletekey
 Root: HKA; Subkey: "Software\Classes\Applications\{#MyAppExeName}\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" ""%1"""
 Root: HKA; Subkey: "Software\Classes\Applications\{#MyAppExeName}\SupportedTypes"; ValueType: string; ValueName: ".cbz"; ValueData: ""
 Root: HKA; Subkey: "Software\Classes\Applications\{#MyAppExeName}\SupportedTypes"; ValueType: string; ValueName: ".epub"; ValueData: ""
 
 ; File association and ProgID for .cbz
-Root: HKA; Subkey: "Software\Classes\.cbz\OpenWithProgids"; ValueType: string; ValueName: "Yukari.cbz"; ValueData: ""; Flags: uninsdeletevalue; Tasks: associatecbz
-Root: HKA; Subkey: "Software\Classes\Yukari.cbz"; ValueType: string; ValueName: ""; ValueData: "{#MyAppName} CBZ Archive"; Flags: uninsdeletekey; Tasks: associatecbz
-Root: HKA; Subkey: "Software\Classes\Yukari.cbz\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\{#MyAppExeName},0"; Tasks: associatecbz
-Root: HKA; Subkey: "Software\Classes\Yukari.cbz\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" ""%1"""; Tasks: associatecbz
+Root: HKA; Subkey: "Software\Classes\.cbz\OpenWithProgids"; ValueType: string; ValueName: "Mana.cbz"; ValueData: ""; Flags: uninsdeletevalue; Tasks: associatecbz
+Root: HKA; Subkey: "Software\Classes\Mana.cbz"; ValueType: string; ValueName: ""; ValueData: "{#MyAppName} CBZ Archive"; Flags: uninsdeletekey; Tasks: associatecbz
+Root: HKA; Subkey: "Software\Classes\Mana.cbz\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\{#MyAppExeName},0"; Tasks: associatecbz
+Root: HKA; Subkey: "Software\Classes\Mana.cbz\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" ""%1"""; Tasks: associatecbz
 
 ; File association and ProgID for .epub
-Root: HKA; Subkey: "Software\Classes\.epub\OpenWithProgids"; ValueType: string; ValueName: "Yukari.epub"; ValueData: ""; Flags: uninsdeletevalue; Tasks: associateepub
-Root: HKA; Subkey: "Software\Classes\Yukari.epub"; ValueType: string; ValueName: ""; ValueData: "{#MyAppName} EPUB Document"; Flags: uninsdeletekey; Tasks: associateepub
-Root: HKA; Subkey: "Software\Classes\Yukari.epub\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\{#MyAppExeName},0"; Tasks: associateepub
-Root: HKA; Subkey: "Software\Classes\Yukari.epub\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" ""%1"""; Tasks: associateepub
+Root: HKA; Subkey: "Software\Classes\.epub\OpenWithProgids"; ValueType: string; ValueName: "Mana.epub"; ValueData: ""; Flags: uninsdeletevalue; Tasks: associateepub
+Root: HKA; Subkey: "Software\Classes\Mana.epub"; ValueType: string; ValueName: ""; ValueData: "{#MyAppName} EPUB Document"; Flags: uninsdeletekey; Tasks: associateepub
+Root: HKA; Subkey: "Software\Classes\Mana.epub\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\{#MyAppExeName},0"; Tasks: associateepub
+Root: HKA; Subkey: "Software\Classes\Mana.epub\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" ""%1"""; Tasks: associateepub
 
 [Icons]
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"

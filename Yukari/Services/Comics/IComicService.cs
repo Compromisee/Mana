@@ -41,6 +41,8 @@ public interface IComicService
         CancellationToken ct = default
     );
     Task<Result<IReadOnlyList<string>>> GetCollectionsAsync(CancellationToken ct = default);
+    Task<Result<IReadOnlyDictionary<string, string>>> GetCollectionColorsAsync(CancellationToken ct = default);
+    Task<Result> SetCollectionColorAsync(string collectionName, string color);
     Task<Result<ComicReadingProgress>> GetComicReadingProgressAsync(
         ContentKey comicKey,
         string language,
@@ -62,7 +64,8 @@ public interface IComicService
         ContentKey comicKey,
         ContentKey chapterKey,
         bool forceWeb = false,
-        CancellationToken ct = default
+        CancellationToken ct = default,
+        string? chapterUrl = null
     );
     Task<Result<LocalChapterScanResult?>> GetStandaloneChapterAsync(
         string filePath,

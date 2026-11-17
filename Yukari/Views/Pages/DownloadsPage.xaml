@@ -22,7 +22,7 @@
                   BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                   BorderThickness="1"
                   CornerRadius="8"
-                  RowDefinitions="*, Auto">
+                  RowDefinitions="*, Auto, Auto">
                 <Grid Grid.Row="0" ColumnDefinitions="*, Auto, Auto, Auto" ColumnSpacing="4">
                     <Grid Grid.Column="0" RowDefinitions="Auto, Auto" RowSpacing="2">
                         <TextBlock Grid.Row="0"
@@ -155,6 +155,11 @@
                                HorizontalAlignment="Right"
                                Text="{x:Bind FormattedProgress, Mode=OneWay}" />
                 </Grid>
+                <TextBlock Grid.Row="2"
+                           Margin="0,0,0,6"
+                           FontSize="12"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           Text="{x:Bind FormattedETA, Mode=OneWay}" />
             </Grid>
         </DataTemplate>
     </Page.Resources>

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -31,7 +32,7 @@ public partial class SettingsPageViewModel : ObservableObject
 
     private bool _isInitializing = true;
 
-    public string YukariVersion { get; } = AppInfoHelper.Version;
+    public string ManaVersion { get; } = AppInfoHelper.Version;
     public string CoreVersion { get; } = AppInfoHelper.CoreVersionString;
 
     public ThemeMode[] AvailableThemeModes { get; } = Enum.GetValues<ThemeMode>();
@@ -57,6 +58,29 @@ public partial class SettingsPageViewModel : ObservableObject
 
     [ObservableProperty]
     public partial ScalingMode SelectedScalingMode { get; set; }
+
+    [ObservableProperty]
+    public partial bool ShowLocalComicInfoBeforeReading { get; set; }
+
+    [ObservableProperty]
+    public partial bool LockLocalLibrary { get; set; }
+
+    [ObservableProperty]
+    public partial bool CompactListMode { get; set; }
+
+    [ObservableProperty]
+    public partial bool AidokuRequestLoggingEnabled { get; set; }
+
+    public string AidokuLogsFolder => AppDataHelper.GetLogsPath();
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSelectedLocalLibraryRoot))]
+    [NotifyCanExecuteChangedFor(nameof(RemoveSelectedLocalLibraryRootCommand))]
+    public partial string? SelectedLocalLibraryRoot { get; set; }
+
+    public bool HasSelectedLocalLibraryRoot => !string.IsNullOrWhiteSpace(SelectedLocalLibraryRoot);
+
+    public ObservableCollection<string> LocalLibraryRoots { get; } = [];
 
     [ObservableProperty]
     public partial ComicSourceModel? DefaultComicSource { get; set; }
@@ -103,6 +127,14 @@ public partial class SettingsPageViewModel : ObservableObject
         IsAutoFullscreen = _settingsService.Current.AutoFullscreen;
         SelectedReadingMode = _settingsService.Current.ReadingMode;
         SelectedScalingMode = _settingsService.Current.ScalingMode;
+        ShowLocalComicInfoBeforeReading = _settingsService.Current.ShowLocalComicInfoBeforeReading;
+        LockLocalLibrary = _settingsService.Current.LockLocalLibrary;
+        CompactListMode = _settingsService.Current.CompactListMode;
+        AidokuRequestLoggingEnabled = _settingsService.Current.AidokuRequestLoggingEnabled;
+        LocalLibraryRoots.Clear();
+        foreach (var root in _settingsService.Current.LocalLibraryRoots ?? Array.Empty<string>())
+            LocalLibraryRoots.Add(root);
+        SelectedLocalLibraryRoot = LocalLibraryRoots.FirstOrDefault();
 
         await LoadComicSourcesAsync();
         if (AvailableComicSources.Count > 0)
@@ -114,6 +146,43 @@ public partial class SettingsPageViewModel : ObservableObject
         }
 
         _isInitializing = false;
+    }
+
+    [RelayCommand]
+    private async Task AddLocalLibraryRootAsync()
+    {
+        var folder = await _dialogService.OpenFolderPickerAsync();
+        if (string.IsNullOrWhiteSpace(folder))
+            return;
+        var roots = (_settingsService.Current.LocalLibraryRoots ?? Array.Empty<string>()).ToList();
+        if (roots.Contains(folder, StringComparer.OrdinalIgnoreCase))
+            return;
+        roots.Add(folder);
+        _settingsService.Set(s => s.LocalLibraryRoots, roots.ToArray());
+        LocalLibraryRoots.Add(folder);
+        SelectedLocalLibraryRoot = folder;
+        await _settingsService.SaveAsync();
+    }
+
+    public async Task RemoveLocalLibraryRootAsync(string folder)
+    {
+        var roots = (_settingsService.Current.LocalLibraryRoots ?? Array.Empty<string>())
+            .Where(root => !root.Equals(folder, StringComparison.OrdinalIgnoreCase))
+            .ToArray();
+        _settingsService.Set(s => s.LocalLibraryRoots, roots);
+        LocalLibraryRoots.Remove(folder);
+        if (string.Equals(SelectedLocalLibraryRoot, folder, StringComparison.OrdinalIgnoreCase))
+            SelectedLocalLibraryRoot = LocalLibraryRoots.FirstOrDefault();
+        await _settingsService.SaveAsync();
+    }
+
+    private bool CanRemoveSelectedLocalLibraryRoot() => !string.IsNullOrWhiteSpace(SelectedLocalLibraryRoot);
+
+    [RelayCommand(CanExecute = nameof(CanRemoveSelectedLocalLibraryRoot))]
+    private async Task RemoveSelectedLocalLibraryRootAsync()
+    {
+        if (!string.IsNullOrWhiteSpace(SelectedLocalLibraryRoot))
+            await RemoveLocalLibraryRootAsync(SelectedLocalLibraryRoot);
     }
 
     [RelayCommand]
@@ -260,6 +329,16 @@ public partial class SettingsPageViewModel : ObservableObject
 
     partial void OnSelectedScalingModeChanged(ScalingMode value) =>
         ApplySetting(s => s.ScalingMode, value);
+
+    partial void OnShowLocalComicInfoBeforeReadingChanged(bool value) =>
+        ApplySetting(s => s.ShowLocalComicInfoBeforeReading, value);
+
+    partial void OnLockLocalLibraryChanged(bool value) => ApplySetting(s => s.LockLocalLibrary, value);
+
+    partial void OnCompactListModeChanged(bool value) => ApplySetting(s => s.CompactListMode, value);
+
+    partial void OnAidokuRequestLoggingEnabledChanged(bool value) =>
+        ApplySetting(s => s.AidokuRequestLoggingEnabled, value);
 
     partial void OnDefaultComicSourceChanged(ComicSourceModel? value)
     {

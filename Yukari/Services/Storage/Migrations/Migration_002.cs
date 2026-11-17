@@ -70,7 +70,7 @@ internal class Migration_002 : IMigration
 
         // 3. Recreate ChapterPages, remove Id column, rename PageNumber to Number,
         // add the ComicId column, enhance PK uniqueness, and correct FK to point to the full primary key of Chapters
-        // There is no need to copy data from the old ChapterPages, as it will certainly be empty since Yukari does not yet support downloads
+        // There is no need to copy data from the old ChapterPages, as it will certainly be empty since the app did not yet support downloads
         await connection.ExecuteAsync(
             """
             CREATE TABLE ChapterPages_new (

@@ -22,14 +22,50 @@ public partial class DownloadItem : ObservableObject
     > PageProvider { get; }
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(CanCancel), nameof(CanRetry), nameof(IsFinished))]
+    [NotifyPropertyChangedFor(nameof(CanCancel), nameof(CanRetry), nameof(IsFinished), nameof(FormattedETA))]
     public partial DownloadStatus Status { get; set; } = DownloadStatus.Queued;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(FormattedProgress))]
     public partial double Progress { get; set; } = 0.0;
 
-    public string FormattedProgress => $"{Progress * 100:00}%";
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(FormattedProgress))]
+    public partial int CompletedPages { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(FormattedProgress))]
+    public partial int TotalPages { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(FormattedETA))]
+    public partial int QueuePosition { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(FormattedETA))]
+    public partial TimeSpan? EstimatedTimeRemaining { get; set; }
+
+    public string FormattedProgress => TotalPages > 0
+        ? $"{Progress:P0} · {CompletedPages}/{TotalPages} pages"
+        : $"{Progress:P0}";
+
+    public string FormattedETA => Status switch
+    {
+        DownloadStatus.Queued => EstimatedTimeRemaining is { } wait
+            ? $"Queued #{QueuePosition} · starts in {FormatDuration(wait)}"
+            : QueuePosition > 0 ? $"Queued #{QueuePosition}" : "Queued",
+        DownloadStatus.Downloading => EstimatedTimeRemaining is { } eta
+            ? $"ETA {FormatDuration(eta)}"
+            : "Preparing download…",
+        DownloadStatus.Completed => "Complete",
+        DownloadStatus.Failed => "Failed",
+        DownloadStatus.Cancelled => "Cancelled",
+        _ => string.Empty
+    };
+
+    private static string FormatDuration(TimeSpan value) => value.TotalHours >= 1
+        ? $"{(int)value.TotalHours}h {value.Minutes}m"
+        : value.TotalMinutes >= 1 ? $"{value.Minutes}m {value.Seconds}s" : $"{Math.Max(1, value.Seconds)}s";
 
     public bool CanCancel => Status is DownloadStatus.Queued or DownloadStatus.Downloading;
     public bool CanRetry => Status is DownloadStatus.Failed or DownloadStatus.Cancelled;

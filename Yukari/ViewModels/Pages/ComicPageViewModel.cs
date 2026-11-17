@@ -50,6 +50,7 @@ public partial class ComicPageViewModel
         nameof(IsComicAvailable),
         nameof(IsOnlineFeaturesVisible),
         nameof(AuthorDisplay),
+        nameof(ComicDisplayTitle),
         nameof(IsPublishedVisible),
         nameof(StatusDisplay),
         nameof(IsTagsVisible),
@@ -61,6 +62,10 @@ public partial class ComicPageViewModel
     )]
     [NotifyCanExecuteChangedFor(nameof(SaveCoverCommand))]
     public partial ComicModel? Comic { get; set; }
+
+    public string ComicDisplayTitle => !string.IsNullOrWhiteSpace(Comic?.Title)
+        ? Comic.Title
+        : Comic?.Id ?? _comicKey?.Id ?? _localizationService.GetString("Unknown");
 
     public string AuthorDisplay => Comic?.Author ?? _localizationService.GetString("Unknown");
     public bool IsPublishedVisible => Comic?.Year != null;
@@ -397,7 +402,8 @@ public partial class ComicPageViewModel
                             _comicKey,
                             chapterVm.Key,
                             forceWeb: true,
-                            ct
+                            ct: ct,
+                            chapterUrl: chapterVm.Chapter.Url
                         )
                 );
         }
@@ -557,6 +563,7 @@ public partial class ComicPageViewModel
                     _comicKey,
                     IsFavorite,
                     Comic!.Title,
+                    _settingsService.Current.CompactListMode,
                     NavigateToReaderCommand,
                     MarkPreviousChaptersAsReadCommand,
                     ExportChapterCommand

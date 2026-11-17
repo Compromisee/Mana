@@ -48,7 +48,8 @@
         </DataTemplate>
 
         <DataTemplate x:Key="ChaptersTemplate" x:DataType="vmc:ChapterItemViewModel">
-            <Button Padding="6"
+            <Button Padding="4"
+                    MinHeight="{x:Bind RowHeight}"
                     HorizontalAlignment="Stretch"
                     HorizontalContentAlignment="Stretch"
                     Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
@@ -62,16 +63,19 @@
                     <Color x:Key="ButtonBorderBrushDisabled">Transparent</Color>
                 </Button.Resources>
                 <Grid ColumnDefinitions="*, Auto" ColumnSpacing="8">
-                    <Grid Grid.Column="0" HorizontalAlignment="Stretch" RowDefinitions="Auto, 20, *">
+                    <Grid Grid.Column="0" HorizontalAlignment="Stretch" RowDefinitions="Auto,Auto,Auto">
                         <TextBlock Grid.Row="0"
-                                   FontSize="18"
+                                   FontSize="{x:Bind TitleFontSize}"
+                                   MaxLines="1"
+                                   TextTrimming="CharacterEllipsis"
                                    Style="{StaticResource BodyStrongTextBlockStyle}"
                                    Text="{x:Bind DisplayTitle}" />
 
                         <StackPanel Grid.Row="1"
                                     VerticalAlignment="Bottom"
                                     Orientation="Horizontal"
-                                    Spacing="4">
+                                    Spacing="4"
+                                    Visibility="{x:Bind IsCompactListMode, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert, Mode=OneWay}">
                             <ItemsView ItemTemplate="{StaticResource GroupsTemplate}" ItemsSource="{x:Bind DisplayGroups, Mode=OneWay}" SelectionMode="None">
                                 <ItemsView.Layout>
                                     <StackLayout Orientation="Horizontal" Spacing="5" />
@@ -87,8 +91,9 @@
 
                         <TextBlock Grid.Row="2"
                                    VerticalAlignment="Bottom"
-                                   FontSize="14"
-                                   Text="{x:Bind Chapter.LastUpdate, FallbackValue=''}" />
+                                   FontSize="12"
+                                   Text="{x:Bind Chapter.LastUpdate, FallbackValue=''}"
+                                   Visibility="{x:Bind IsCompactListMode, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert, Mode=OneWay}" />
                     </Grid>
                     <StackPanel Grid.Column="1"
                                 HorizontalAlignment="Right"
@@ -211,7 +216,7 @@
     <Grid>
         <Grid RowDefinitions="Auto, *" Visibility="{x:Bind ViewModel.IsComicLoaded, Converter={StaticResource BooleanToVisibilityConverter}, Mode=OneWay}">
             <Grid Grid.Row="0"
-                  MaxWidth="1000"
+                  MaxWidth="1300"
                   Padding="20,14,36,16"
                   ColumnDefinitions="*, Auto, Auto"
                   ColumnSpacing="8">
@@ -224,9 +229,8 @@
                     <TextBlock Grid.Column="1"
                                VerticalAlignment="Center"
                                Style="{StaticResource TitleTextBlockStyle}"
-                               Text="{x:Bind ViewModel.Comic.Title, Mode=OneWay}"
-                               TextWrapping="NoWrap"
-                               ToolTipService.ToolTip="{x:Bind ViewModel.Comic.Title, Mode=OneWay}" />
+                               Text="Details"
+                               TextWrapping="NoWrap" />
                 </Grid>
 
                 <TextBlock Grid.Column="1"
@@ -290,7 +294,7 @@
                                 <MenuFlyoutItem x:Uid="OpenInBrowserMNItem"
                                                 Command="{x:Bind ViewModel.OpenInBrowserCommand}"
                                                 Icon="Globe"
-                                                Visibility="{x:Bind ViewModel.IsLocalComic, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert, Mode=OneWay}" />
+                                                Visibility="{Binding IsLocalComic, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}" />
                             </MenuFlyout>
                         </Button.Flyout>
                     </Button>
@@ -300,7 +304,7 @@
 
             <ScrollViewer Grid.Row="1">
                 <Grid Padding="0,0,16,16">
-                    <Grid MaxWidth="1000" RowDefinitions="Auto, Auto">
+                    <Grid MaxWidth="1300" HorizontalAlignment="Center" VerticalAlignment="Top" RowDefinitions="Auto, Auto">
                         <InfoBar x:Uid="UnvailableComicInfoBar"
                                  Grid.Row="0"
                                  Margin="0,0,0,16"
@@ -309,100 +313,91 @@
                                  Severity="Warning"
                                  Visibility="{x:Bind ViewModel.IsComicAvailable, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert, Mode=OneWay}" />
 
-                        <Grid Grid.Row="1" RowDefinitions="280, Auto, Auto" RowSpacing="16">
-                            <Grid Grid.Row="0"
-                                  HorizontalAlignment="Stretch"
-                                  ColumnDefinitions="Auto, *"
-                                  ColumnSpacing="16">
-                                <Border Grid.Column="0"
-                                        MaxWidth="200"
-                                        MaxHeight="280"
-                                        HorizontalAlignment="Left"
-                                        VerticalAlignment="Top"
-                                        CornerRadius="8">
-                                    <Image Source="{Binding Comic.CoverImageUrl, Converter={StaticResource UrlToImageConverter}, Mode=OneWay}" Stretch="Fill" />
-                                </Border>
-                                <StackPanel Grid.Column="1" HorizontalAlignment="Stretch">
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <FontIcon VerticalAlignment="Center" FontSize="20" Glyph="&#xE716;" />
-                                        <TextBlock x:Uid="AuthorTXB"
-                                                   VerticalAlignment="Center"
-                                                   FontSize="20"
-                                                   Style="{StaticResource TitleTextBlockStyle}" />
+                        <Grid Grid.Row="1" RowDefinitions="Auto,Auto" RowSpacing="16">
+                            <Grid Grid.Row="0" Height="356">
+                                <Image x:Name="HeaderBackdrop"
+                                       Source="{Binding Comic.CoverImageUrl, Converter={StaticResource UrlToImageConverter}, Mode=OneWay}"
+                                       Stretch="UniformToFill"
+                                       Opacity="0.36" />
+                                <Rectangle>
+                                    <Rectangle.Fill>
+                                        <LinearGradientBrush StartPoint="0,0.5" EndPoint="1,0.5">
+                                            <GradientStop Color="#16000000" Offset="0" />
+                                            <GradientStop Color="#B824252B" Offset="0.42" />
+                                            <GradientStop Color="{ThemeResource SolidBackgroundFillColorBase}" Offset="1" />
+                                        </LinearGradientBrush>
+                                    </Rectangle.Fill>
+                                </Rectangle>
+                                <Border Background="{ThemeResource AcrylicInAppFillColorDefaultBrush}" />
+                                <Grid Padding="16" ColumnDefinitions="210,*" ColumnSpacing="20">
+                                    <Border Grid.Column="0"
+                                            Width="198"
+                                            Height="324"
+                                            HorizontalAlignment="Left"
+                                            VerticalAlignment="Top"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="4">
+                                        <Image Source="{Binding Comic.CoverImageUrl, Converter={StaticResource UrlToImageConverter}, Mode=OneWay}"
+                                               Stretch="UniformToFill" />
+                                    </Border>
+                                    <Border Grid.Column="1"
+                                            Padding="12"
+                                            VerticalAlignment="Center"
+                                            Background="{ThemeResource AcrylicInAppFillColorDefaultBrush}"
+                                            CornerRadius="4">
+                                    <StackPanel Spacing="8">
+                                        <TextBlock FontSize="32"
+                                                   FontWeight="SemiBold"
+                                                   MaxLines="2"
+                                                   Text="{Binding ComicDisplayTitle, Mode=OneWay}"
+                                                   TextWrapping="WrapWholeWords" />
+                                        <StackPanel Orientation="Horizontal" Spacing="12">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <FontIcon FontSize="14" Glyph="&#xE77B;" />
+                                                <TextBlock Text="{Binding AuthorDisplay, Mode=OneWay}" />
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding Comic.Year, Mode=OneWay}"
+                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                       Visibility="{Binding IsPublishedVisible, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                            <TextBlock Text="{Binding StatusDisplay, Mode=OneWay}"
+                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                       Visibility="{Binding IsLocalComic, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}" />
+                                        </StackPanel>
+                                        <StackPanel Spacing="6"
+                                                    Visibility="{Binding IsDescriptionVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                                    <FontIcon VerticalAlignment="Center" FontSize="18" Glyph="&#xE946;" />
+                                                    <TextBlock x:Uid="SynopsisTXB"
+                                                               VerticalAlignment="Center"
+                                                               FontSize="18"
+                                                               Style="{StaticResource TitleTextBlockStyle}" />
+                                                </StackPanel>
+                                                <ScrollViewer MaxHeight="96"
+                                                              HorizontalScrollBarVisibility="Disabled"
+                                                              VerticalScrollBarVisibility="Auto"
+                                                              Visibility="{Binding IsDescriptionVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                    <RichTextBlock helpers:RichTextHelper.Source="{Binding DescriptionBlocks, Mode=OneWay}"
+                                                                   FontSize="15"
+                                                                   TextAlignment="Left"
+                                                                   TextWrapping="WrapWholeWords" />
+                                                </ScrollViewer>
+                                        </StackPanel>
+                                        <ItemsView ItemTemplate="{StaticResource TagsTemplate}"
+                                                   ItemsSource="{Binding DisplayTags, Mode=OneWay}"
+                                                   SelectionMode="None"
+                                                   Visibility="{Binding IsTagsVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                            <ItemsView.Layout>
+                                                <LinedFlowLayout LineSpacing="4" MinItemSpacing="5" />
+                                            </ItemsView.Layout>
+                                        </ItemsView>
                                     </StackPanel>
-                                    <TextBlock Margin="0,0,0,12" FontSize="16" Text="{x:Bind ViewModel.AuthorDisplay, Mode=OneWay}" />
-
-                                    <StackPanel Orientation="Horizontal" Spacing="8" Visibility="{x:Bind ViewModel.IsPublishedVisible, Converter={StaticResource BooleanToVisibilityConverter}, Mode=OneWay}">
-                                        <FontIcon VerticalAlignment="Center" FontSize="20" Glyph="&#xE787;" />
-                                        <TextBlock x:Uid="PublishedTXB"
-                                                   VerticalAlignment="Center"
-                                                   FontSize="20"
-                                                   Style="{StaticResource TitleTextBlockStyle}" />
-                                    </StackPanel>
-                                    <TextBlock Margin="0,0,0,12"
-                                               FontSize="16"
-                                               Text="{x:Bind ViewModel.Comic.Year, Mode=OneWay}"
-                                               Visibility="{x:Bind ViewModel.IsPublishedVisible, Converter={StaticResource BooleanToVisibilityConverter}, Mode=OneWay}" />
-
-                                    <StackPanel Orientation="Horizontal" Spacing="8" Visibility="{x:Bind ViewModel.IsLocalComic, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert, Mode=OneWay}">
-                                        <FontIcon VerticalAlignment="Center" FontSize="20" Glyph="&#xE9D9;" />
-                                        <TextBlock x:Uid="StatusTXB"
-                                                   VerticalAlignment="Center"
-                                                   FontSize="20"
-                                                   Style="{StaticResource TitleTextBlockStyle}" />
-                                    </StackPanel>
-                                    <TextBlock Margin="0,0,0,12"
-                                               FontSize="16"
-                                               Text="{x:Bind ViewModel.StatusDisplay, Mode=OneWay}"
-                                               Visibility="{x:Bind ViewModel.IsLocalComic, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert, Mode=OneWay}" />
-
-                                    <StackPanel Orientation="Horizontal" Spacing="8" Visibility="{x:Bind ViewModel.IsTagsVisible, Converter={StaticResource BooleanToVisibilityConverter}, Mode=OneWay}">
-                                        <FontIcon VerticalAlignment="Center" FontSize="20" Glyph="&#xE8EC;" />
-                                        <TextBlock VerticalAlignment="Center"
-                                                   FontSize="20"
-                                                   Style="{StaticResource TitleTextBlockStyle}"
-                                                   x:Uid="TagsTXB" />
-                                        <TextBlock VerticalAlignment="Bottom"
-                                                   FontSize="14"
-                                                   Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                                                   Style="{StaticResource CaptionTextBlockStyle}"
-                                                   Text="{x:Bind ViewModel.HiddenTagsText, Mode=OneWay}"
-                                                   Visibility="{x:Bind ViewModel.HasHiddenTags, Converter={StaticResource BooleanToVisibilityConverter}, Mode=OneWay}" />
-                                    </StackPanel>
-                                    <ItemsView Margin="0,8,0,0"
-                                               ItemTemplate="{StaticResource TagsTemplate}"
-                                               ItemsSource="{x:Bind ViewModel.DisplayTags, Mode=OneWay}"
-                                               SelectionMode="None">
-                                        <ItemsView.Layout>
-                                            <LinedFlowLayout LineSpacing="4.2" MinItemSpacing="5" />
-                                        </ItemsView.Layout>
-                                    </ItemsView>
-                                </StackPanel>
+                                    </Border>
+                                </Grid>
                             </Grid>
 
-                            <StackPanel Grid.Row="1" Spacing="8" Visibility="{x:Bind ViewModel.IsDescriptionVisible, Converter={StaticResource BooleanToVisibilityConverter}, Mode=OneWay}">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <FontIcon VerticalAlignment="Center" FontSize="20" Glyph="&#xE946;" />
-                                    <TextBlock x:Uid="SynopsisTXB"
-                                               VerticalAlignment="Center"
-                                               FontSize="20"
-                                               Style="{StaticResource TitleTextBlockStyle}" />
-                                </StackPanel>
-                                <ScrollViewer MaxHeight="180"
-                                              Padding="6,0,16,0"
-                                              Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                                              BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                              BorderThickness="1"
-                                              CornerRadius="8">
-                                    <RichTextBlock Margin="0,0,0,2"
-                                                   helpers:RichTextHelper.Source="{x:Bind ViewModel.DescriptionBlocks, Mode=OneWay}"
-                                                   FontSize="16"
-                                                   TextAlignment="Justify"
-                                                   TextWrapping="WrapWholeWords" />
-                                </ScrollViewer>
-                            </StackPanel>
-
-                            <Grid Grid.Row="2" RowDefinitions="Auto, *" RowSpacing="12">
+                            <Grid Grid.Row="1" RowDefinitions="Auto,Auto" RowSpacing="12">
                                 <Grid Grid.Row="0" ColumnDefinitions="*, Auto" ColumnSpacing="8">
                                     <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
                                         <FontIcon VerticalAlignment="Center" FontSize="24" Glyph="&#xE736;" />

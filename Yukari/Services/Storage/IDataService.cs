@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,11 +21,25 @@ public interface IDataService
     Task<ComicModel?> GetComicDetailsAsync(ContentKey comicKey, CancellationToken ct = default);
     Task<ComicUserData> GetComicUserDataAsync(ContentKey comicKey, CancellationToken ct = default);
     Task<IReadOnlyList<string>> GetCollectionsAsync(CancellationToken ct = default);
+    Task<IReadOnlyDictionary<string, string>> GetCollectionColorsAsync(CancellationToken ct = default);
+    Task SetCollectionColorAsync(string collectionName, string color);
+    Task<IReadOnlyList<LocalLibraryGroup>> GetLocalLibraryGroupsAsync(CancellationToken ct = default);
+    Task<IReadOnlyDictionary<string, LocalLibraryGroup>> GetLocalLibraryGroupAssignmentsAsync(CancellationToken ct = default);
+    Task CreateLocalLibraryGroupAsync(string name, string color);
+    Task RenameLocalLibraryGroupAsync(string oldName, string newName, string color);
+    Task RemoveLocalLibraryGroupAsync(string name);
+    Task SetLocalLibraryGroupAsync(string folderPath, string? groupName);
     Task<ComicReadingProgress> GetComicReadingProgressAsync(
         ContentKey comicKey,
         string language,
         CancellationToken ct = default
     );
+    Task<IReadOnlyList<ReadingActivityDay>> GetReadingActivityAsync(
+        DateOnly startDate,
+        DateOnly endDate,
+        CancellationToken ct = default
+    );
+    Task AddReadingSecondsAsync(int seconds, CancellationToken ct = default);
     Task<IReadOnlyList<ChapterModel>> GetAllChaptersAsync(
         ContentKey comicKey,
         string language,

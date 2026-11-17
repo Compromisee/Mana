@@ -41,7 +41,8 @@ public interface ISourceService
         string sourceName,
         string comicId,
         string chapterId,
-        CancellationToken ct = default
+        CancellationToken ct = default,
+        string? chapterUrl = null
     );
     Task<byte[]?> GetImageBytesAsync(
         string sourceName,

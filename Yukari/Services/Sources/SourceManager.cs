@@ -110,6 +110,21 @@ internal class SourceManager : ResultServiceBase, ISourceManager
         );
     }
 
+    public async Task<Result> UpsertAidokuSourceAsync(ComicSourceModel source)
+    {
+        return await ExecuteAsync(
+            async () =>
+            {
+                if (string.IsNullOrWhiteSpace(source.Name) || !source.IsAidoku || !File.Exists(source.DllPath))
+                    return Result.Failure("The Aidoku package is missing or invalid.");
+                await _dbService.UpsertComicSourceAsync(source);
+                _logger.LogInformation("Aidoku source '{SourceName}' registered (enabled: {Enabled})", source.Name, source.IsEnabled);
+                return Result.Success();
+            },
+            _localizationService.GetString("ErrorAddingUpdatingComicSource")
+        );
+    }
+
     public async Task<Result> UpdateComicSourceIsEnabledAsync(string sourceName, bool isEnabled)
     {
         return await ExecuteAsync(
@@ -143,7 +158,14 @@ internal class SourceManager : ResultServiceBase, ISourceManager
                             $"The source '{sourceName}' is not registered in the database."
                         );
 
-                    if (
+                    await _srcService.UnloadSourceAsync(sourceName);
+                    if (comicSource.IsAidoku && !string.IsNullOrWhiteSpace(comicSource.DllPath))
+                    {
+                        var installDirectory = Path.GetDirectoryName(comicSource.DllPath);
+                        if (!string.IsNullOrWhiteSpace(installDirectory) && Directory.Exists(installDirectory))
+                            Directory.Delete(installDirectory, recursive: true);
+                    }
+                    else if (
                         !string.IsNullOrWhiteSpace(comicSource.DllPath)
                         && File.Exists(comicSource.DllPath)
                     )

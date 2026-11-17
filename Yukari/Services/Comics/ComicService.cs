@@ -176,6 +176,27 @@ internal class ComicService : ResultServiceBase, IComicService
         );
     }
 
+    public async Task<Result<IReadOnlyDictionary<string, string>>> GetCollectionColorsAsync(
+        CancellationToken ct = default
+    ) =>
+        await ExecuteAsync(
+            async (ct) => Result<IReadOnlyDictionary<string, string>>.Success(
+                await _dbService.GetCollectionColorsAsync(ct)
+            ),
+            _localizationService.GetString("ErrorFetchingCollections"),
+            ct
+        );
+
+    public async Task<Result> SetCollectionColorAsync(string collectionName, string color) =>
+        await ExecuteAsync(
+            async () =>
+            {
+                await _dbService.SetCollectionColorAsync(collectionName, color);
+                return Result.Success();
+            },
+            _localizationService.GetString("ErrorRenamingCollection")
+        );
+
     public async Task<Result<ComicReadingProgress>> GetComicReadingProgressAsync(
         ContentKey comicKey,
         string language,
@@ -269,7 +290,8 @@ internal class ComicService : ResultServiceBase, IComicService
         ContentKey comicKey,
         ContentKey chapterKey,
         bool forceWeb = false,
-        CancellationToken ct = default
+        CancellationToken ct = default,
+        string? chapterUrl = null
     )
     {
         return await ExecuteAsync(
@@ -296,7 +318,8 @@ internal class ComicService : ResultServiceBase, IComicService
                         comicKey.Source,
                         comicKey.Id,
                         chapterKey.Id,
-                        ct
+                        ct,
+                        chapterUrl
                     );
                 }
 

@@ -112,7 +112,10 @@
                               x:Uid="FullscreenTBT">
                     <FontIcon FontSize="16" Glyph="{x:Bind ViewModel.FullscreenButtonIcon, Mode=OneWay}" />
                 </ToggleButton>
-                <Button Content="{ui:FontIcon Glyph=&#xE712;}" Style="{StaticResource TitleBarButtonStyle}" x:Uid="ReaderOptionsBT">
+                <Button x:Name="ReaderOptionsBT"
+                        Content="{ui:FontIcon Glyph=&#xE712;}"
+                        Style="{StaticResource TitleBarButtonStyle}"
+                        x:Uid="ReaderOptionsBT">
                     <Button.Flyout>
                         <MenuFlyout Placement="Bottom">
                             <MenuFlyoutSubItem x:Uid="ReadingModeSBItem" Icon="{ui:FontIcon Glyph=&#xE736;}">
@@ -164,6 +167,9 @@
                                                      IsChecked="{x:Bind ViewModel.ScalingMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=OriginalSize, Mode=OneWay}" />
                             </MenuFlyoutSubItem>
                             <MenuFlyoutSeparator />
+                            <MenuFlyoutItem Text="Image adjustments"
+                                            Click="ImageAdjustments_Click"
+                                            Icon="{ui:FontIcon Glyph=&#xE9E9;}" />
                             <MenuFlyoutItem x:Uid="SavePageMNItem" Command="{x:Bind ViewModel.SaveCurrentPageImageCommand}" Icon="{ui:FontIcon Glyph=&#xE74E;}" />
                         </MenuFlyout>
                     </Button.Flyout>
@@ -366,6 +372,11 @@
                     </StackPanel>
                 </Grid>
             </Grid>
+
+            <Grid x:Name="ReaderImageAdjustmentLayer"
+                  Grid.Row="1"
+                  Background="Transparent"
+                  IsHitTestVisible="False" />
 
             <Button x:Name="LeftEdgeButton"
                     Grid.Row="1"

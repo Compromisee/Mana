@@ -14,5 +14,7 @@ public class ComicSourceModel
 
     public string? PendingUpdatePath { get; set; }
 
-    public bool IsCoreOutdated => Version.IsCoreOutdated();
+    public bool IsAidoku => DllPath.EndsWith(".aix", System.StringComparison.OrdinalIgnoreCase);
+
+    public bool IsCoreOutdated => !IsAidoku && Version.IsCoreOutdated();
 }

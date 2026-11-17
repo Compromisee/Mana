@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest an idea for Yukari
+about: Suggest an idea for Mana
 title: "**Title:** [Briefly describe the feature]"
 labels: enhancement
 assignees: ''

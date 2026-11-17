@@ -135,6 +135,47 @@
                         </ComboBox>
                     </toolkit:SettingsCard>
 
+                    <!--  Local library  -->
+                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}">
+                        <Run FontWeight="Bold" Text="Local library" />
+                    </TextBlock>
+                    <toolkit:SettingsCard Header="Manage folders"
+                                          Description="Import a local folder or remove a tracked folder from Mana without deleting anything from disk"
+                                          HeaderIcon="{ui:FontIcon Glyph=&#xE8B7;}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <ComboBox Width="360"
+                                      ItemsSource="{x:Bind ViewModel.LocalLibraryRoots, Mode=OneWay}"
+                                      SelectedItem="{x:Bind ViewModel.SelectedLocalLibraryRoot, Mode=TwoWay}"
+                                      PlaceholderText="No tracked folders"
+                                      ToolTipService.ToolTip="Choose a tracked folder" />
+                            <Button Command="{x:Bind ViewModel.RemoveSelectedLocalLibraryRootCommand, Mode=OneWay}"
+                                    Content="Remove selected"
+                                    IsEnabled="{x:Bind ViewModel.HasSelectedLocalLibraryRoot, Mode=OneWay}" />
+                            <Button Command="{x:Bind ViewModel.AddLocalLibraryRootCommand, Mode=OneWay}"
+                                    Content="Import folder" />
+                        </StackPanel>
+                    </toolkit:SettingsCard>
+                    <toolkit:SettingsCard Header="Manage library groups"
+                                          Description="Create, rename, recolor, or remove groups for your local titles"
+                                          HeaderIcon="{ui:FontIcon Glyph=&#xE8D3;}">
+                        <Button Click="ManageGroups_Click" Content="Manage groups" />
+                    </toolkit:SettingsCard>
+                    <toolkit:SettingsCard Header="Compact list mode"
+                                          Description="Use shorter rows for repository results and chapter lists"
+                                          HeaderIcon="{ui:FontIcon Glyph=&#xE8FD;}">
+                        <ToggleSwitch IsOn="{x:Bind ViewModel.CompactListMode, Mode=TwoWay}" />
+                    </toolkit:SettingsCard>
+                    <toolkit:SettingsCard Header="Comic information page"
+                                          Description="Show local details before opening a chapter"
+                                          HeaderIcon="{ui:FontIcon Glyph=&#xE946;}">
+                        <ToggleSwitch IsOn="{x:Bind ViewModel.ShowLocalComicInfoBeforeReading, Mode=TwoWay}" />
+                    </toolkit:SettingsCard>
+                    <toolkit:SettingsCard Header="Lock local library"
+                                          Description="Require a private PIN when opening the library. Set the PIN on first use."
+                                          HeaderIcon="{ui:FontIcon Glyph=&#xE72E;}">
+                        <ToggleSwitch IsOn="{x:Bind ViewModel.LockLocalLibrary, Mode=TwoWay}" />
+                    </toolkit:SettingsCard>
+
                     <!--  Sources Section  -->
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}">
                         <Run x:Uid="SourcesSection" FontWeight="Bold" />
@@ -228,6 +269,18 @@
                         </ComboBox>
                     </toolkit:SettingsCard>
 
+                    <toolkit:SettingsCard Header="Aidoku request logging"
+                                          Description="Record Aidoku runtime calls and HTTP requests, including GET responses. Headers and bodies are never written; sensitive URL query values are redacted."
+                                          HeaderIcon="{ui:FontIcon Glyph=&#xE756;}">
+                        <StackPanel Spacing="6">
+                            <ToggleSwitch IsOn="{x:Bind ViewModel.AidokuRequestLoggingEnabled, Mode=TwoWay}" />
+                            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       IsTextSelectionEnabled="True"
+                                       Text="{x:Bind ViewModel.AidokuLogsFolder, Mode=OneTime}" />
+                            <Button Click="OpenAidokuLogsFolder_Click" Content="Open logs folder" />
+                        </StackPanel>
+                    </toolkit:SettingsCard>
+
                     <!--  Storage Section  -->
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}">
                         <Run x:Uid="StorageSection" FontWeight="Bold" />
@@ -243,26 +296,26 @@
                     <toolkit:SettingsExpander x:Name="AboutExpander"
                                               HorizontalAlignment="Stretch"
                                               HorizontalContentAlignment="Stretch"
-                                              Header="Yukari"
+                                              Header="Mana"
                                               HeaderIcon="{ui:BitmapIcon Source=ms-appx:///Assets/Square44x44Logo.altform-lightunplated_targetsize-32.png}">
                         <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" IsTextSelectionEnabled="True">
                             <Run x:Uid="VersionRun" />
-                            <Run Text="{x:Bind ViewModel.YukariVersion, Mode=OneTime}" />
+                            <Run Text="{x:Bind ViewModel.ManaVersion, Mode=OneTime}" />
                         </TextBlock>
                         <toolkit:SettingsExpander.Items>
                             <!--  Project links  -->
                             <toolkit:SettingsCard HorizontalContentAlignment="Left" ContentAlignment="Left">
                                 <StackPanel Margin="-12,0,0,0" Orientation="Vertical">
-                                    <HyperlinkButton x:Uid="ProjectRepoHLBT" NavigateUri="https://github.com/Yukari-App/Yukari" />
-                                    <HyperlinkButton x:Name="LicenseHLBT" NavigateUri="https://github.com/Yukari-App/Yukari/blob/master/LICENSE.txt" />
-                                    <HyperlinkButton x:Uid="CheckUpdatesHLBT" NavigateUri="https://github.com/Yukari-App/Yukari/releases" />
+                                    <HyperlinkButton x:Uid="ProjectRepoHLBT" NavigateUri="https://github.com/compromisee/Mana" />
+                                    <HyperlinkButton x:Name="LicenseHLBT" NavigateUri="https://github.com/compromisee/Mana/blob/master/LICENSE.txt" />
+                                    <HyperlinkButton x:Uid="CheckUpdatesHLBT" NavigateUri="https://github.com/compromisee/Mana/releases" />
                                 </StackPanel>
                             </toolkit:SettingsCard>
 
                             <!--  Feedback links  -->
                             <toolkit:SettingsCard HorizontalContentAlignment="Left" ContentAlignment="Left">
                                 <StackPanel Margin="-12,0,0,0" Orientation="Vertical">
-                                    <HyperlinkButton x:Uid="FeedbackHLBT" NavigateUri="https://github.com/Yukari-App/Yukari/issues" />
+                                    <HyperlinkButton x:Uid="FeedbackHLBT" NavigateUri="https://github.com/compromisee/Mana/issues" />
                                 </StackPanel>
                             </toolkit:SettingsCard>
 

@@ -26,7 +26,7 @@ namespace Yukari;
 
 public sealed partial class MainWindow : Window, IBrowserHost, IRecipient<SetFullscreenMessage>
 {
-    private const string WindowTitle = "Yukari";
+    private const string WindowTitle = "Mana";
     private const string WindowIconPath = "Assets/AppIcon.ico";
 
     private const int MinWidth = 654;
@@ -276,9 +276,9 @@ public sealed partial class MainWindow : Window, IBrowserHost, IRecipient<SetFul
         Closed -= MainWindow_Closed;
 
 #if DEBUG || DEBUG_UNPACKAGED
-        Log.Debug("Yukari Debug closing — session ended");
+        Log.Debug("Mana Debug closing — session ended");
 #else
-        Log.Information("Yukari closing — session ended");
+        Log.Information("Mana closing — session ended");
 #endif
         await Log.CloseAndFlushAsync();
         Close();

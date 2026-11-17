@@ -22,7 +22,11 @@
     </ContentDialog.Title>
 
     <ContentDialog.Resources>
-        <selectors:FilterTemplateSelector x:Key="FilterTemplateSelector" MultipleFilterTemplate="{StaticResource MultipleFilterTemplate}" SingleFilterTemplate="{StaticResource SingleFilterTemplate}" />
+        <selectors:FilterTemplateSelector x:Key="FilterTemplateSelector"
+                                           MultipleFilterTemplate="{StaticResource MultipleFilterTemplate}"
+                                           SingleFilterTemplate="{StaticResource SingleFilterTemplate}"
+                                           SortFilterTemplate="{StaticResource SortFilterTemplate}"
+                                           TextFilterTemplate="{StaticResource TextFilterTemplate}" />
 
         <DataTemplate x:Key="SingleFilterTemplate" x:DataType="vmc:FilterViewModel">
             <Grid Height="46"
@@ -45,6 +49,57 @@
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="TextFilterTemplate" x:DataType="vmc:FilterViewModel">
+            <Grid Margin="0,0,0,6"
+                  Padding="12,8"
+                  Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                  BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                  BorderThickness="1"
+                  RowDefinitions="Auto,Auto"
+                  CornerRadius="4">
+                <TextBlock Margin="4,0,4,6"
+                           Style="{StaticResource BodyStrongTextBlockStyle}"
+                           Text="{x:Bind DisplayName}" />
+                <TextBox Grid.Row="1"
+                         PlaceholderText="{x:Bind DisplayName}"
+                         Text="{x:Bind TextValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="SortFilterTemplate" x:DataType="vmc:FilterViewModel">
+            <Grid Margin="0,0,0,6"
+                  Padding="12,8"
+                  Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                  BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                  BorderThickness="1"
+                  ColumnDefinitions="*,Auto"
+                  RowDefinitions="Auto,Auto"
+                  CornerRadius="4">
+                <TextBlock Grid.Row="0"
+                           Grid.ColumnSpan="2"
+                           Margin="4,0,4,6"
+                           Style="{StaticResource BodyStrongTextBlockStyle}"
+                           Text="{x:Bind DisplayName}" />
+                <ComboBox Grid.Row="1"
+                          Grid.Column="0"
+                          VerticalAlignment="Center"
+                          ItemsSource="{x:Bind Options}"
+                          SelectedItem="{x:Bind SelectedOptionIfNotAllowMultiple, Mode=TwoWay}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate x:DataType="vmc:ToggleOptionViewModel">
+                            <TextBlock VerticalAlignment="Center" Text="{x:Bind DisplayName}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <ToggleSwitch Grid.Row="1"
+                              Grid.Column="1"
+                              Margin="10,0,0,0"
+                              VerticalAlignment="Center"
+                              Header="Ascending"
+                              IsOn="{x:Bind SortAscending, Mode=TwoWay}" />
             </Grid>
         </DataTemplate>
 

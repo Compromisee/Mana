@@ -434,10 +434,10 @@
     <value>コミックソース</value>
   </data>
   <data name="ComicSourcesHelpExpander.Description" xml:space="preserve">
-    <value>Yukariプラグインを理解する</value>
+    <value>Manaプラグインを理解する</value>
   </data>
   <data name="ComicSourcesHelp1" xml:space="preserve">
-    <value>**Yukari** には法的な理由により **コミックソース** がプリインストールされていません。**コミュニティプラグイン** を通じて必要なソースを追加します。</value>
+    <value>**Mana** には法的な理由により **コミックソース** がプリインストールされていません。**コミュニティプラグイン** を通じて必要なソースを追加します。</value>
   </data>
   <data name="ComicSourcesHelp2" xml:space="preserve">
     <value>**コミックソース** のインストールは簡単です：** .dll** プラグインをダウンロードし、**設定 → コミックソース → 新しいソースを追加** でダウンロードしたプラグインを選択します。</value>
@@ -446,7 +446,7 @@
     <value>プラグインは [こちら](https://github.com/orgs/Yukari-App/repositories?q=Plugin%20sort%3Aname-asc) で見つかります。名前に "Plugin" を含む **リポジトリ** を選び、**リリース** セクションから互換バージョンをダウンロードしてください。</value>
   </data>
   <data name="ComicSourcesHelp4" xml:space="preserve">
-    <value>**最新バージョンのYukariを使用していることを確認**して、最新プラグインとの互換性を保ってください。[リリースページ](https://github.com/Yukari-App/Yukari/releases) をチェックしてください。</value>
+    <value>**最新バージョンのManaを使用していることを確認**して、最新プラグインとの互換性を保ってください。[リリースページ](https://github.com/compromisee/Mana/releases) をチェックしてください。</value>
   </data>
   <data name="ComicsSection.Text" xml:space="preserve">
     <value>漫画</value>
@@ -473,7 +473,7 @@
     <value>個人の漫画コレクションを読む</value>
   </data>
   <data name="LocalComicsHelp1" xml:space="preserve">
-    <value>Yukariは3つのローカル形式に対応しています：**画像を含むフォルダ**（1チャプター1フォルダ）、**.cbz**、および **.epub** アーカイブ。ページは展開せずに直接読み取られます。</value>
+    <value>Manaは3つのローカル形式に対応しています：**画像を含むフォルダ**（1チャプター1フォルダ）、**.cbz**、および **.epub** アーカイブ。ページは展開せずに直接読み取られます。</value>
   </data>
   <data name="LocalComicsHelp2" xml:space="preserve">
     <value>ローカル漫画を追加するには：**お気に入り** → ⋯ メニュー → **ローカル漫画を追加**。詳細を入力し、チャプターが含まれるフォルダを指定します。</value>
@@ -509,7 +509,7 @@
     <value>**オフライン** で読むために、漫画ページからチャプターをダウンロードします。ダウンロードはバックグラウンドで実行され、進行状況がチャプターごとに表示されます。</value>
   </data>
   <data name="DownloadsHelp2" xml:space="preserve">
-    <value>ダウンロードしたチャプターは **Yukariのアプリデータフォルダ** に保存されます。漫画ページから個別のチャプターまたは全チャプターを一度に削除できます。</value>
+    <value>ダウンロードしたチャプターは **Manaのアプリデータフォルダ** に保存されます。漫画ページから個別のチャプターまたは全チャプターを一度に削除できます。</value>
   </data>
   <data name="DownloadsHelp3" xml:space="preserve">
     <value>お気に入りから漫画を削除すると、**ダウンロードされたデータはすべて自動的に削除されます**。</value>
@@ -524,10 +524,10 @@
     <value>ヘルプの利用と問題の報告</value>
   </data>
   <data name="SupportHelp1" xml:space="preserve">
-    <value>何かが動作しない場合は、[既知の問題](https://github.com/Yukari-App/Yukari/issues) を確認するか、新しい問題を報告してください。あなたのフィードバックがYukariをより良くします！</value>
+    <value>何かが動作しない場合は、[既知の問題](https://github.com/compromisee/Mana/issues) を確認するか、新しい問題を報告してください。あなたのフィードバックがManaをより良くします！</value>
   </data>
   <data name="InitializationErrorTXB.Text" xml:space="preserve">
-    <value>Yukariの初期化中にエラーが発生しました</value>
+    <value>Manaの初期化中にエラーが発生しました</value>
   </data>
   <data name="InitializationErrorSuggestionTXB.Text" xml:space="preserve">
     <value>アプリをもう一度開いてみてください。問題が解決しない場合は、下のボタンからフィードバックを送信してください。</value>
@@ -829,10 +829,10 @@
     <value>コミックソースが正常に追加/更新されました。</value>
   </data>
   <data name="WarningUpdatingSourceInUseRestartRequest" xml:space="preserve">
-    <value>ソースは現在使用中で更新できません。Yukariを再起動して更新を完了してください。</value>
+    <value>ソースは現在使用中で更新できません。Manaを再起動して更新を完了してください。</value>
   </data>
   <data name="WarningRemovingSourceInUseRestartRequest" xml:space="preserve">
-    <value>ソースは現在使用中で削除できません。Yukariを再起動して削除を完了してください。</value>
+    <value>ソースは現在使用中で削除できません。Manaを再起動して削除を完了してください。</value>
   </data>
   <data name="SuccessStorageCleanedUp" xml:space="preserve">
     <value>ストレージが正常にクリーンアップされました。</value>
@@ -952,7 +952,7 @@
     <value>ソース '{0}' は現在無効です。設定で有効にしてください。</value>
   </data>
   <data name="ErrorPluginVersionMismatch" xml:space="preserve">
-    <value>プラグイン '{0}' はこのバージョンのYukariと互換性がありません。互換性のあるバージョンのプラグインをダウンロードするか、Yukariを更新してください。</value>
+    <value>プラグイン '{0}' はこのバージョンのManaと互換性がありません。互換性のあるバージョンのプラグインをダウンロードするか、Manaを更新してください。</value>
   </data>
   <data name="ErrorCollectionAlreadyExists" xml:space="preserve">
     <value>'{0}' という名前のコレクションは既に存在します。</value>

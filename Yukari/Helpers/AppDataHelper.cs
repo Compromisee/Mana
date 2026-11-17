@@ -6,6 +6,7 @@ namespace Yukari.Helpers;
 
 public static class AppDataHelper
 {
+    // Keep the original Yukari storage path so existing libraries and settings survive the Mana rebrand.
     private static readonly string _appDataPath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
         "Yukari"
@@ -14,6 +15,29 @@ public static class AppDataHelper
     public static string GetAppDataPath() => EnsureDirectory(_appDataPath);
 
     public static string GetDataPath() => EnsureDirectory(Path.Combine(GetAppDataPath(), "Data"));
+
+    // Keep diagnostic logs easy to find in the current user's home directory:
+    // C:\\Users\\<user>\\logs on Windows, /home/<user>/logs on Linux.
+    public static string GetLogsPath()
+    {
+        var homeLogsPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+            "logs"
+        );
+        try
+        {
+            return EnsureDirectory(homeLogsPath);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            // Packaged Windows apps may not be allowed to write directly under the profile.
+            return EnsureDirectory(Path.Combine(GetAppDataPath(), "Logs"));
+        }
+        catch (IOException)
+        {
+            return EnsureDirectory(Path.Combine(GetAppDataPath(), "Logs"));
+        }
+    }
 
     public static string GetDatabasePath() => Path.Combine(GetDataPath(), "yukari.db");
 

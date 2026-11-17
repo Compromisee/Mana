@@ -172,6 +172,100 @@ internal class DataService : IDataService
         return result.ToList();
     }
 
+    public async Task<IReadOnlyDictionary<string, string>> GetCollectionColorsAsync(CancellationToken ct = default)
+    {
+        using var connection = await GetOpenConnectionAsync();
+        var rows = await connection.QueryAsync<(string Name, string Color)>(
+            new CommandDefinition("SELECT Name, Color FROM Collections ORDER BY Name;", cancellationToken: ct)
+        );
+        return rows.ToDictionary(row => row.Name, row => row.Color, StringComparer.OrdinalIgnoreCase);
+    }
+
+    public async Task SetCollectionColorAsync(string collectionName, string color)
+    {
+        using var connection = await GetOpenConnectionAsync();
+        await connection.ExecuteAsync(
+            "UPDATE Collections SET Color = @Color WHERE Name = @Name;",
+            new { Name = collectionName, Color = color }
+        );
+    }
+
+    public async Task<IReadOnlyList<LocalLibraryGroup>> GetLocalLibraryGroupsAsync(CancellationToken ct = default)
+    {
+        using var connection = await GetOpenConnectionAsync();
+        var groups = await connection.QueryAsync<LocalLibraryGroup>(
+            new CommandDefinition("SELECT Id, Name, Color FROM LocalLibraryGroups ORDER BY Name;", cancellationToken: ct)
+        );
+        return groups.ToList();
+    }
+
+    public async Task<IReadOnlyDictionary<string, LocalLibraryGroup>> GetLocalLibraryGroupAssignmentsAsync(CancellationToken ct = default)
+    {
+        using var connection = await GetOpenConnectionAsync();
+        var rows = await connection.QueryAsync<(string FolderPath, int Id, string Name, string Color)>(
+            new CommandDefinition(
+                """
+                SELECT items.FolderPath, groups.Id, groups.Name, groups.Color
+                FROM LocalLibraryGroupItems items
+                INNER JOIN LocalLibraryGroups groups ON groups.Id = items.GroupId;
+                """,
+                cancellationToken: ct
+            )
+        );
+        return rows.ToDictionary(
+            row => row.FolderPath,
+            row => new LocalLibraryGroup { Id = row.Id, Name = row.Name, Color = row.Color },
+            StringComparer.OrdinalIgnoreCase
+        );
+    }
+
+    public async Task CreateLocalLibraryGroupAsync(string name, string color)
+    {
+        using var connection = await GetOpenConnectionAsync();
+        await connection.ExecuteAsync(
+            "INSERT OR IGNORE INTO LocalLibraryGroups(Name, Color) VALUES(@Name, @Color);",
+            new { Name = name.Trim(), Color = color }
+        );
+    }
+
+    public async Task RenameLocalLibraryGroupAsync(string oldName, string newName, string color)
+    {
+        using var connection = await GetOpenConnectionAsync();
+        await connection.ExecuteAsync(
+            "UPDATE LocalLibraryGroups SET Name = @NewName, Color = @Color WHERE Name = @OldName;",
+            new { OldName = oldName, NewName = newName.Trim(), Color = color }
+        );
+    }
+
+    public async Task RemoveLocalLibraryGroupAsync(string name)
+    {
+        using var connection = await GetOpenConnectionAsync();
+        await connection.ExecuteAsync("DELETE FROM LocalLibraryGroups WHERE Name = @Name;", new { Name = name });
+    }
+
+    public async Task SetLocalLibraryGroupAsync(string folderPath, string? groupName)
+    {
+        using var connection = await GetOpenConnectionAsync();
+        var fullPath = System.IO.Path.GetFullPath(folderPath);
+        if (string.IsNullOrWhiteSpace(groupName))
+        {
+            await connection.ExecuteAsync(
+                "DELETE FROM LocalLibraryGroupItems WHERE FolderPath = @FolderPath;",
+                new { FolderPath = fullPath }
+            );
+            return;
+        }
+
+        await connection.ExecuteAsync(
+            """
+            INSERT INTO LocalLibraryGroupItems(FolderPath, GroupId)
+            SELECT @FolderPath, Id FROM LocalLibraryGroups WHERE Name = @GroupName
+            ON CONFLICT(FolderPath) DO UPDATE SET GroupId = excluded.GroupId;
+            """,
+            new { FolderPath = fullPath, GroupName = groupName }
+        );
+    }
+
     public async Task<ComicReadingProgress> GetComicReadingProgressAsync(
         ContentKey comicKey,
         string language,
@@ -202,6 +296,60 @@ internal class DataService : IDataService
         return result ?? new ComicReadingProgress() { LanguageCode = language };
     }
 
+    public async Task<IReadOnlyList<ReadingActivityDay>> GetReadingActivityAsync(
+        DateOnly startDate,
+        DateOnly endDate,
+        CancellationToken ct = default
+    )
+    {
+        using var connection = await GetOpenConnectionAsync();
+        var rows = await connection.QueryAsync<ReadingActivityDay>(
+            new CommandDefinition(
+                """
+                WITH ActivityDates AS (
+                    SELECT ActivityDate FROM ReadingActivity
+                    WHERE ActivityDate >= @StartDate AND ActivityDate <= @EndDate
+                    UNION
+                    SELECT ActivityDate FROM DailyReadingActivity
+                    WHERE ActivityDate >= @StartDate AND ActivityDate <= @EndDate
+                ), TitleCounts AS (
+                    SELECT ActivityDate, COUNT(*) AS ComicsRead
+                    FROM ReadingActivity
+                    WHERE ActivityDate >= @StartDate AND ActivityDate <= @EndDate
+                    GROUP BY ActivityDate
+                )
+                SELECT d.ActivityDate,
+                       COALESCE(t.ComicsRead, 0) AS ComicsRead,
+                       COALESCE(r.SecondsRead, 0) AS SecondsRead
+                FROM ActivityDates d
+                LEFT JOIN TitleCounts t ON t.ActivityDate = d.ActivityDate
+                LEFT JOIN DailyReadingActivity r ON r.ActivityDate = d.ActivityDate
+                ORDER BY d.ActivityDate;
+                """,
+                new { StartDate = startDate, EndDate = endDate },
+                cancellationToken: ct
+            )
+        );
+        return rows.ToList();
+    }
+
+    public async Task AddReadingSecondsAsync(int seconds, CancellationToken ct = default)
+    {
+        if (seconds <= 0) return;
+        using var connection = await GetOpenConnectionAsync();
+        await connection.ExecuteAsync(
+            new CommandDefinition(
+                """
+                INSERT INTO DailyReadingActivity (ActivityDate, SecondsRead)
+                VALUES (date('now', 'localtime'), @Seconds)
+                ON CONFLICT(ActivityDate) DO UPDATE SET SecondsRead = SecondsRead + excluded.SecondsRead;
+                """,
+                new { Seconds = seconds },
+                cancellationToken: ct
+            )
+        );
+    }
+
     public async Task<IReadOnlyList<ChapterModel>> GetAllChaptersAsync(
         ContentKey comicKey,
         string language,
@@ -212,7 +360,7 @@ internal class DataService : IDataService
 
         const string sql = """
             SELECT Id, ComicId, Source,
-                Title, Number, Volume,
+                Title, Url, Number, Volume,
                 Language, Groups, LastUpdate,
                 Pages, IsAvailable
             FROM Chapters
@@ -554,6 +702,10 @@ internal class DataService : IDataService
             "UPDATE ComicUserData SET LastReadAt = datetime('now') WHERE ComicId = @Id AND Source = @Source;",
             new { Id = comicKey.Id, Source = comicKey.Source }
         );
+        await connection.ExecuteAsync(
+            "INSERT OR IGNORE INTO ReadingActivity (ActivityDate, ComicId, Source) VALUES (date('now', 'localtime'), @Id, @Source);",
+            new { Id = comicKey.Id, Source = comicKey.Source }
+        );
     }
 
     public async Task UpsertChaptersAsync(
@@ -607,10 +759,11 @@ internal class DataService : IDataService
 
         const string sqlUpsert = """
             INSERT INTO Chapters 
-            (Id, ComicId, Source, Title, Number, Volume, Language, Groups, LastUpdate, Pages, SortOrder, IsAvailable)
-            VALUES (@Id, @ComicId, @Source, @Title, @Number, @Volume, @Language, @Groups, @LastUpdate, @Pages, @SortOrder, 1)
+            (Id, ComicId, Source, Title, Url, Number, Volume, Language, Groups, LastUpdate, Pages, SortOrder, IsAvailable)
+            VALUES (@Id, @ComicId, @Source, @Title, @Url, @Number, @Volume, @Language, @Groups, @LastUpdate, @Pages, @SortOrder, 1)
             ON CONFLICT(Id, ComicId, Source) DO UPDATE SET
                 Title = excluded.Title,
+                Url = COALESCE(excluded.Url, Chapters.Url),
                 Number = excluded.Number,
                 Volume = excluded.Volume,
                 Language = excluded.Language,
@@ -631,6 +784,7 @@ internal class DataService : IDataService
                         ComicId = comicKey.Id,
                         c.Source,
                         c.Title,
+                        c.Url,
                         c.Number,
                         c.Volume,
                         c.Language,
